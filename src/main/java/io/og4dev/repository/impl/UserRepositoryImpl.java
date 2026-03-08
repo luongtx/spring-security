@@ -4,6 +4,7 @@ import io.og4dev.entity.UserEntity;
 import io.og4dev.repository.UserRepository;
 import io.og4dev.util.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -14,38 +15,36 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UserEntity findByUsername(String username) {
-        return template.queryForObject("SELECT * FROM users WHERE username=?", (rs, rowNum) -> {
-            if (rowNum > 0) {
-                return new UserEntity(
-                        rs.getLong("id"),
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        Role.valueOf(rs.getString("role")),
-                        rs.getBoolean("enabled")
-                );
-            } else {
-                return null;
-            }
-        }, username);
+        try {
+            return template.queryForObject("SELECT * FROM users WHERE username=?", (rs, rowNum) ->
+                    new UserEntity(
+                            rs.getLong("id"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            Role.valueOf(rs.getString("role")),
+                            rs.getBoolean("enabled")
+                    ), username);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
     public UserEntity findByEmail(String email) {
-        return template.queryForObject("SELECT * FROM users WHERE email=?", (rs, rowNum) -> {
-            if (rowNum > 0) {
-                return new UserEntity(
-                        rs.getLong("id"),
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        Role.valueOf(rs.getString("role")),
-                        rs.getBoolean("enabled")
-                );
-            } else {
-                return null;
-            }
-        }, email);
+        try {
+            return template.queryForObject("SELECT * FROM users WHERE email=?", (rs, rowNum) ->
+                    new UserEntity(
+                            rs.getLong("id"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            Role.valueOf(rs.getString("role")),
+                            rs.getBoolean("enabled")
+                    ), email);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
@@ -60,10 +59,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UserEntity save(UserEntity userEntity) {
-        template.update("INSERT INTO users (username, email, password, enabled) VALUES (?,?,?,?)",
+        template.update("INSERT INTO users (username, email, password, role, enabled) VALUES (?,?,?,?,?)",
                 userEntity.getUsername(),
                 userEntity.getEmail(),
                 userEntity.getPassword(),
+                userEntity.getRole().name(),
                 userEntity.getEnabled());
         return findByUsername(userEntity.getUsername());
     }

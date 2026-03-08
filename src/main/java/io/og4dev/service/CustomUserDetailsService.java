@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity entity = repository.findByUsername(username);
         if (entity == null) throw new UsernameNotFoundException("User not found: "+username);
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(entity.getRole().name());
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(authority);
         return new User(
