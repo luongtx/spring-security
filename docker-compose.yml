@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: spring-security-app
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 1g 
+    ports:
+      - "8080:8080"
+      - "7091:7091" # JMX PORT
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASS: Password
+
+      # java runtime arguments
+      GC_STRATEGY: G1
+      INITAL_HEAP_SIZE: 
+      MAX_HEAP_SIZE: 
+
+      # jmc configs
+      JMC: true
+      JMX_PORT: 7091
+
+      #jwt configs
+      JWT_SECRET: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+      JWT_EXPIRE: 500000
+
+networks:
+  default:
+    external: true
+    name: shared 
